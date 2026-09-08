@@ -1,0 +1,37 @@
+{
+  "name": "box-mount-contract-review",
+  "version": "1.0.0",
+  "description": "Box Mount contract review demo for E2B and Box",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "doctor": "tsx src/doctor.ts",
+    "seed": "tsx src/seed.ts",
+    "demo": "tsx src/demo.ts",
+    "status": "tsx src/status.ts",
+    "teardown": "tsx src/teardown.ts",
+    "generate:fixtures": "tsx scripts/generate-fixtures.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck"
+  },
+  "keywords": [
+    "box",
+    "e2b",
+    "ai-agents"
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "box-node-sdk": "^10.14.0",
+    "dotenv": "^17.4.2",
+    "e2b": "^2.38.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "docx": "^9.7.1",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  }
+}
