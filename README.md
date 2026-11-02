@@ -8,7 +8,6 @@ This sample runs a contract-review workflow with Box Mount in E2B. It uses Box A
 
 - Node.js 20+
 - An [E2B](https://e2b.dev) API key
-- A new, empty Box folder and its folder ID
 - A Box Developer Token
 - Box AI API access, or optionally an OpenAI API key
 - The Linux x86_64 Box Mount archive
@@ -46,23 +45,27 @@ task assignment.
 
 ## Run
 
-### 1. Validate your setup
+### 1. Validate your environment (optional)
 
 ```bash
 npm run doctor
 ```
 
-This checks your Box and E2B access, Box folder, fixtures, and Box Mount
-binary. If an OpenAI key is configured, it also verifies the key and selected
-model; otherwise, the demo uses Box AI.
+This checks your Box and E2B access, fixtures, and Box Mount binary.
 
-### 2. Seed the Box folder
+### 2. Set up a fresh demo workspace
 
 ```bash
-npm run seed
+npm run setup
 ```
 
-This copies the synthetic MSA and approved legal playbook into your Box folder.
+This creates a new Box folder (timestamped so they never collide), seeds the
+synthetic MSA and playbook into it via Box Mount, and saves the folder ID to
+local state. If a previous demo exists, it is torn down automatically.
+
+To place demo folders under a specific parent, set `BOX_PARENT_FOLDER_ID` in
+`.env`. To use a pre-existing folder instead of auto-creating one, set
+`BOX_FOLDER_ID`.
 
 ### 3. Run the review
 
@@ -82,7 +85,7 @@ You can check the mount at any time:
 npm run status
 ```
 
-### 5. Clean up
+### 5. Clean up and repeat
 
 When you are finished:
 
@@ -90,6 +93,18 @@ When you are finished:
 npm run teardown
 ```
 
-This performs a final sync, unmounts the Box folder, and destroys the sandbox. All synchronized content remains available in Box. E2B also expires the demo automatically after one hour.
+This performs a final sync, unmounts the Box folder, destroys the sandbox, and
+deletes the auto-created Box folder from Box. All you need for the next demo
+is `npm run setup` again.
+
+**Repeat quickly:**
+
+```bash
+npm run setup   # auto-cleans previous demo, creates fresh folder, seeds
+npm run demo    # runs the contract review
+# ... when ready for a fresh run ...
+npm run setup   # tears down and sets up again
+npm run demo
+```
 
 The included contract and review are synthetic demonstrations, not legal advice.

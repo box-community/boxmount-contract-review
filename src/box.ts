@@ -9,6 +9,51 @@ export function createBoxClient(token: string): BoxClient {
   return new BoxClient({ auth });
 }
 
+export async function createDemoFolder(
+  token: string,
+  parentFolderId: string,
+): Promise<{ folderId: string; folderName: string }> {
+  const client = createBoxClient(token);
+  const stamp = new Date()
+    .toISOString()
+    .replace(/[:.]/g, "-")
+    .slice(0, 19);
+  const name = `Box-Mount-Demo-${stamp}`;
+
+  const folder = await client.folders.createFolder({
+    name,
+    parent: { id: parentFolderId },
+  });
+  const folderId = folder.id;
+
+  await Promise.all([
+    client.folders.createFolder({
+      name: "Incoming",
+      parent: { id: folderId },
+    }),
+    client.folders.createFolder({
+      name: "Playbook",
+      parent: { id: folderId },
+    }),
+    client.folders.createFolder({
+      name: "Reviewed",
+      parent: { id: folderId },
+    }),
+  ]);
+
+  return { folderId, folderName: name };
+}
+
+export async function deleteDemoFolder(
+  token: string,
+  folderId: string,
+): Promise<void> {
+  const client = createBoxClient(token);
+  await client.folders.deleteFolderById(folderId, {
+    queryParams: { recursive: true },
+  });
+}
+
 async function findChildId(
   client: BoxClient,
   parentFolderId: string,

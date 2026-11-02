@@ -31,6 +31,7 @@ export type DemoConfig = {
   e2bApiKey: string;
   boxAccessToken: string;
   boxFolderId: string;
+  boxParentFolderId: string;
   boxReviewerUserId: string;
   openaiApiKey: string;
   openaiModel: string;
@@ -99,15 +100,36 @@ function resolveBoxMountArchive(): string {
   );
 }
 
-export function getDemoConfig(): DemoConfig {
+export function getSetupConfig(): DemoConfig {
   return {
     e2bApiKey: required("E2B_API_KEY"),
     boxAccessToken: required("BOX_ACCESS_TOKEN"),
-    boxFolderId: required("BOX_FOLDER_ID"),
+    boxFolderId: process.env.BOX_FOLDER_ID?.trim() || "",
+    boxParentFolderId:
+      process.env.BOX_PARENT_FOLDER_ID?.trim() || "0",
     boxReviewerUserId:
       process.env.BOX_REVIEWER_USER_ID?.trim() || "",
     openaiApiKey: process.env.OPENAI_API_KEY?.trim() || "",
     openaiModel: process.env.OPENAI_MODEL?.trim() || "gpt-5.5",
     boxMountArchive: resolveBoxMountArchive(),
   };
+}
+
+export function getDemoConfig(boxFolderId?: string): DemoConfig {
+  return {
+    e2bApiKey: required("E2B_API_KEY"),
+    boxAccessToken: required("BOX_ACCESS_TOKEN"),
+    boxFolderId: boxFolderId || required("BOX_FOLDER_ID"),
+    boxParentFolderId:
+      process.env.BOX_PARENT_FOLDER_ID?.trim() || "0",
+    boxReviewerUserId:
+      process.env.BOX_REVIEWER_USER_ID?.trim() || "",
+    openaiApiKey: process.env.OPENAI_API_KEY?.trim() || "",
+    openaiModel: process.env.OPENAI_MODEL?.trim() || "gpt-5.5",
+    boxMountArchive: resolveBoxMountArchive(),
+  };
+}
+
+export function requireBoxAccessToken(): string {
+  return required("BOX_ACCESS_TOKEN");
 }

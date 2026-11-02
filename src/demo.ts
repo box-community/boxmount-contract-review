@@ -16,20 +16,24 @@ import {
 } from "./sandbox.js";
 import {
   readState,
-  removeState,
   writeState,
 } from "./state.js";
 
 async function main(): Promise<void> {
   const existing = await readState();
-  if (existing) {
+  if (existing?.sandboxId) {
     throw new Error(
-      `A demo is already registered (${existing.sandboxId}).\n` +
-        "Run npm run status or npm run teardown before starting another.",
+      `A demo is already running (${existing.sandboxId}).\n` +
+        "Run npm run teardown before starting another.",
+    );
+  }
+  if (!existing) {
+    throw new Error(
+      "No setup found. Run npm run setup first.",
     );
   }
 
-  const config = getDemoConfig();
+  const config = getDemoConfig(existing.boxFolderId);
   let sandbox: Sandbox | undefined;
   let mounted = false;
   let handedOff = false;
@@ -42,7 +46,10 @@ async function main(): Promise<void> {
       await unmountBox(sandbox).catch(() => undefined);
     }
     await sandbox?.kill().catch(() => undefined);
-    await removeState();
+    await writeState({
+      boxFolderId: existing.boxFolderId,
+      boxFolderAutoCreated: existing.boxFolderAutoCreated,
+    });
   };
 
   const onInterrupt = (): void => {
@@ -58,8 +65,9 @@ async function main(): Promise<void> {
     const createdAt = new Date();
 
     await writeState({
+      boxFolderId: existing.boxFolderId,
+      boxFolderAutoCreated: existing.boxFolderAutoCreated,
       sandboxId: sandbox.sandboxId,
-      boxFolderId: config.boxFolderId,
       mountPath: REMOTE_MOUNT_PATH,
       outputPath: REVIEW_OUTPUT_PATH,
       createdAt: createdAt.toISOString(),

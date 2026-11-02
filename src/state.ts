@@ -2,12 +2,13 @@ import { readFile, rm, writeFile } from "node:fs/promises";
 import { STATE_PATH } from "./config.js";
 
 export type DemoState = {
-  sandboxId: string;
   boxFolderId: string;
-  mountPath: string;
-  outputPath: string;
-  createdAt: string;
-  expiresAt: string;
+  boxFolderAutoCreated: boolean;
+  sandboxId?: string;
+  mountPath?: string;
+  outputPath?: string;
+  createdAt?: string;
+  expiresAt?: string;
 };
 
 export async function readState(): Promise<DemoState | null> {

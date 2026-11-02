@@ -10,12 +10,26 @@ import { readState } from "./state.js";
 async function main(): Promise<void> {
   const state = await readState();
   if (!state) {
-    throw new Error("No active demo is registered. Run npm run demo.");
+    throw new Error("No active demo is registered. Run npm run setup.");
+  }
+
+  console.log(`Box folder: ${state.boxFolderId}`);
+  if (state.boxFolderAutoCreated) {
+    console.log("  (auto-created; teardown will delete it)");
+  }
+
+  if (!state.sandboxId) {
+    console.log("\nSetup is complete but no demo is running yet.");
+    console.log("Next: npm run demo");
+    return;
   }
 
   console.log(`Sandbox: ${state.sandboxId}`);
-  console.log(`Box folder: ${state.boxFolderId}`);
-  console.log(`Expected expiry: ${new Date(state.expiresAt).toLocaleString()}`);
+  if (state.expiresAt) {
+    console.log(
+      `Expected expiry: ${new Date(state.expiresAt).toLocaleString()}`,
+    );
+  }
 
   try {
     const sandbox = await connectSandbox(
@@ -36,7 +50,7 @@ async function main(): Promise<void> {
     throw new Error(
       `The saved sandbox is no longer reachable.\n` +
         `It may have reached E2B's one-hour limit.\n` +
-        `Run npm run teardown to clear local state.\n\n` +
+        `Run npm run teardown to clear state.\n\n` +
         `${(error as Error).message}`,
     );
   }

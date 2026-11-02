@@ -9,7 +9,7 @@
   },
   "scripts": {
     "doctor": "tsx src/doctor.ts",
-    "seed": "tsx src/seed.ts",
+    "setup": "tsx src/setup.ts",
     "demo": "tsx src/demo.ts",
     "status": "tsx src/status.ts",
     "teardown": "tsx src/teardown.ts",

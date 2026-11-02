@@ -6,7 +6,7 @@ import {
   type Sandbox,
 } from "e2b";
 import { validateBoxAccess } from "./box.js";
-import { FIXTURES_PATH, getDemoConfig } from "./config.js";
+import { FIXTURES_PATH, getSetupConfig } from "./config.js";
 import {
   createDemoSandbox,
   installBoxMount,
@@ -57,7 +57,7 @@ async function validateOpenAi(
 }
 
 async function main(): Promise<void> {
-  const config = getDemoConfig();
+  const config = getSetupConfig();
   await access(
     join(FIXTURES_PATH, "Incoming", "Acme-MSA.docx"),
   );
@@ -70,17 +70,27 @@ async function main(): Promise<void> {
   );
 
   console.log("✓ Configuration and fixtures found");
+  const parentId = config.boxParentFolderId;
   const box = await validateBoxAccess(
     config.boxAccessToken,
-    config.boxFolderId,
+    config.boxFolderId || parentId,
   );
   console.log(`✓ Box token works for ${box.user}`);
-  console.log(`✓ Box folder is accessible: ${box.folder}`);
+  if (config.boxFolderId) {
+    console.log(`✓ Box folder is accessible: ${box.folder}`);
+  } else {
+    console.log(
+      `ℹ No BOX_FOLDER_ID set; setup will auto-create under ${parentId === "0" ? "All Files" : `folder ${parentId}`}`,
+    );
+  }
 
   let sandbox: Sandbox | undefined;
   try {
     console.log("Creating a short-lived E2B compatibility check...");
-    sandbox = await createDemoSandbox(config, 5 * 60 * 1000);
+    sandbox = await createDemoSandbox(
+      { ...config, boxFolderId: config.boxFolderId || "0" },
+      5 * 60 * 1000,
+    );
     await installBoxMount(
       sandbox,
       config.boxMountArchive,
@@ -95,7 +105,7 @@ async function main(): Promise<void> {
     await sandbox?.kill().catch(() => undefined);
   }
 
-  console.log("\nSetup looks good. Next: npm run seed");
+  console.log("\nSetup looks good. Next: npm run setup");
 }
 
 main().catch((error: unknown) => {
