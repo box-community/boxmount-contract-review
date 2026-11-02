@@ -30,6 +30,9 @@ const ARCHIVE_EXTENSIONS = [".tar.gz", ".tgz"];
 export type DemoConfig = {
   e2bApiKey: string;
   boxAccessToken: string;
+  boxRefreshToken: string;
+  boxClientId: string;
+  boxClientSecret: string;
   boxFolderId: string;
   boxParentFolderId: string;
   boxReviewerUserId: string;
@@ -100,11 +103,13 @@ function resolveBoxMountArchive(): string {
   );
 }
 
-export function getSetupConfig(): DemoConfig {
+function commonConfig() {
   return {
     e2bApiKey: required("E2B_API_KEY"),
-    boxAccessToken: required("BOX_ACCESS_TOKEN"),
-    boxFolderId: process.env.BOX_FOLDER_ID?.trim() || "",
+    boxClientId: process.env.BOX_CLIENT_ID?.trim() || "",
+    boxClientSecret: process.env.BOX_CLIENT_SECRET?.trim() || "",
+    boxAccessToken: process.env.BOX_ACCESS_TOKEN?.trim() || "",
+    boxRefreshToken: "",
     boxParentFolderId:
       process.env.BOX_PARENT_FOLDER_ID?.trim() || "0",
     boxReviewerUserId:
@@ -112,24 +117,19 @@ export function getSetupConfig(): DemoConfig {
     openaiApiKey: process.env.OPENAI_API_KEY?.trim() || "",
     openaiModel: process.env.OPENAI_MODEL?.trim() || "gpt-5.5",
     boxMountArchive: resolveBoxMountArchive(),
+  };
+}
+
+export function getSetupConfig(): DemoConfig {
+  return {
+    ...commonConfig(),
+    boxFolderId: process.env.BOX_FOLDER_ID?.trim() || "",
   };
 }
 
 export function getDemoConfig(boxFolderId?: string): DemoConfig {
   return {
-    e2bApiKey: required("E2B_API_KEY"),
-    boxAccessToken: required("BOX_ACCESS_TOKEN"),
+    ...commonConfig(),
     boxFolderId: boxFolderId || required("BOX_FOLDER_ID"),
-    boxParentFolderId:
-      process.env.BOX_PARENT_FOLDER_ID?.trim() || "0",
-    boxReviewerUserId:
-      process.env.BOX_REVIEWER_USER_ID?.trim() || "",
-    openaiApiKey: process.env.OPENAI_API_KEY?.trim() || "",
-    openaiModel: process.env.OPENAI_MODEL?.trim() || "gpt-5.5",
-    boxMountArchive: resolveBoxMountArchive(),
   };
-}
-
-export function requireBoxAccessToken(): string {
-  return required("BOX_ACCESS_TOKEN");
 }

@@ -1,8 +1,6 @@
+import { resolveAuth } from "./auth.js";
 import { deleteDemoFolder } from "./box.js";
-import {
-  requireBoxAccessToken,
-  requireE2bApiKey,
-} from "./config.js";
+import { getSetupConfig, requireE2bApiKey } from "./config.js";
 import {
   connectSandbox,
   unmountBox,
@@ -61,8 +59,9 @@ async function main(): Promise<void> {
       console.log(
         `Deleting auto-created Box folder ${state.boxFolderId}...`,
       );
+      const config = await resolveAuth(getSetupConfig());
       await deleteDemoFolder(
-        requireBoxAccessToken(),
+        config.boxAccessToken,
         state.boxFolderId,
       );
       console.log("Box folder deleted.");

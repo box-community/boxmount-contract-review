@@ -8,11 +8,9 @@ This sample runs a contract-review workflow with Box Mount in E2B. It uses Box A
 
 - Node.js 20+
 - An [E2B](https://e2b.dev) API key
-- A Box Developer Token
+- A Box app in the [Developer Console](https://app.box.com/developers/console)
 - Box AI API access, or optionally an OpenAI API key
 - The Linux x86_64 Box Mount archive
-
-Developer Tokens expire after approximately 60 minutes and are for demo use only.
 
 ## Setup
 
@@ -21,7 +19,22 @@ npm install
 cp .env.example .env
 ```
 
-Fill in `.env`, then place the separately supplied Linux archive in:
+Fill in `.env` with your E2B key and Box credentials.
+
+### Box authentication
+
+**OAuth (recommended)** — set `BOX_CLIENT_ID` and `BOX_CLIENT_SECRET`. On first
+run the app opens your browser for a one-time Box login, then saves tokens to
+`.box-tokens.json`. Tokens auto-refresh for up to 60 days, so you never need to
+paste a new token. Your Box app must have `http://localhost:8787/callback` as a
+redirect URI.
+
+**Developer Token** — set `BOX_ACCESS_TOKEN` instead. Quick to start but expires
+every 60 minutes.
+
+### Box Mount binary
+
+Place the separately supplied Linux archive in:
 
 ```text
 private/

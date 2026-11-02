@@ -20,6 +20,11 @@ export async function createDemoSandbox(
   const envs: Record<string, string> = {
     BOX_ACCESS_TOKEN: config.boxAccessToken,
   };
+  if (config.boxRefreshToken) {
+    envs.BOX_REFRESH_TOKEN = config.boxRefreshToken;
+    envs.BOX_CLIENT_ID = config.boxClientId;
+    envs.BOX_CLIENT_SECRET = config.boxClientSecret;
+  }
   if (config.openaiApiKey) {
     envs.OPENAI_API_KEY = config.openaiApiKey;
     envs.OPENAI_MODEL = config.openaiModel;

@@ -5,6 +5,7 @@ import {
   CommandExitError,
   type Sandbox,
 } from "e2b";
+import { resolveAuth } from "./auth.js";
 import { validateBoxAccess } from "./box.js";
 import { FIXTURES_PATH, getSetupConfig } from "./config.js";
 import {
@@ -57,7 +58,7 @@ async function validateOpenAi(
 }
 
 async function main(): Promise<void> {
-  const config = getSetupConfig();
+  const baseConfig = getSetupConfig();
   await access(
     join(FIXTURES_PATH, "Incoming", "Acme-MSA.docx"),
   );
@@ -70,12 +71,14 @@ async function main(): Promise<void> {
   );
 
   console.log("✓ Configuration and fixtures found");
+  const config = await resolveAuth(baseConfig);
+  console.log("✓ Box authentication OK");
   const parentId = config.boxParentFolderId;
   const box = await validateBoxAccess(
     config.boxAccessToken,
     config.boxFolderId || parentId,
   );
-  console.log(`✓ Box token works for ${box.user}`);
+  console.log(`✓ Box API works for ${box.user}`);
   if (config.boxFolderId) {
     console.log(`✓ Box folder is accessible: ${box.folder}`);
   } else {
@@ -114,9 +117,9 @@ main().catch((error: unknown) => {
     error.responseInfo.statusCode === 401
   ) {
     console.error(
-      "\nDoctor failed:\nBox authentication failed. Your Developer Token " +
-        "may have expired.\nGenerate a new token and update " +
-        "BOX_ACCESS_TOKEN in .env.",
+      "\nDoctor failed:\nBox authentication failed. If using a Developer " +
+        "Token, it may have expired. If using OAuth, delete " +
+        ".box-tokens.json and retry.",
     );
   } else {
     console.error(`\nDoctor failed:\n${(error as Error).message}`);

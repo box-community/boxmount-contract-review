@@ -1,4 +1,5 @@
 import type { Sandbox } from "e2b";
+import { resolveAuth } from "./auth.js";
 import {
   createDemoFolder,
   deleteDemoFolder,
@@ -7,7 +8,6 @@ import {
 import {
   FIXTURES_PATH,
   getSetupConfig,
-  requireBoxAccessToken,
   requireE2bApiKey,
 } from "./config.js";
 import { uploadFixtures } from "./fixtures.js";
@@ -25,7 +25,9 @@ import {
   writeState,
 } from "./state.js";
 
-async function teardownExisting(): Promise<void> {
+async function teardownExisting(
+  boxAccessToken: string,
+): Promise<void> {
   const state = await readState();
   if (!state) return;
 
@@ -47,10 +49,7 @@ async function teardownExisting(): Promise<void> {
 
   if (state.boxFolderAutoCreated) {
     try {
-      await deleteDemoFolder(
-        requireBoxAccessToken(),
-        state.boxFolderId,
-      );
+      await deleteDemoFolder(boxAccessToken, state.boxFolderId);
       console.log(`  Deleted Box folder ${state.boxFolderId}`);
     } catch {
       console.log(
@@ -63,9 +62,10 @@ async function teardownExisting(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  await teardownExisting();
+  const baseConfig = getSetupConfig();
+  const config = await resolveAuth(baseConfig);
 
-  const config = getSetupConfig();
+  await teardownExisting(config.boxAccessToken);
 
   const box = await validateBoxAccess(
     config.boxAccessToken,

@@ -1,4 +1,5 @@
 import type { Sandbox } from "e2b";
+import { resolveAuth } from "./auth.js";
 import { getDemoConfig } from "./config.js";
 import {
   REVIEW_OUTPUT_PATH,
@@ -33,7 +34,8 @@ async function main(): Promise<void> {
     );
   }
 
-  const config = getDemoConfig(existing.boxFolderId);
+  const baseConfig = getDemoConfig(existing.boxFolderId);
+  const config = await resolveAuth(baseConfig);
   let sandbox: Sandbox | undefined;
   let mounted = false;
   let handedOff = false;
