@@ -66,31 +66,32 @@ npm run doctor
 
 This checks your Box and E2B access, fixtures, and Box Mount binary.
 
-### 2. Set up a fresh demo workspace
-
-```bash
-npm run setup
-```
-
-This creates a new Box folder (timestamped so they never collide), seeds the
-synthetic MSA and playbook into it via Box Mount, and saves the folder ID to
-local state. If a previous demo exists, it is torn down automatically.
-
-To place demo folders under a specific parent, set `BOX_PARENT_FOLDER_ID` in
-`.env`. To use a pre-existing folder instead of auto-creating one, set
-`BOX_FOLDER_ID`.
-
-### 3. Run the review
+### 2. Run the demo
 
 ```bash
 npm run demo
 ```
 
-The demo creates an E2B sandbox, mounts the Box folder, runs the selected reviewer, and writes the resulting memo into `Reviewed/`. When an OpenAI key is configured, that reviewer runs inside E2B against the mounted files. If a Box reviewer is configured, the demo assigns that person a review task on the output. The sandbox remains running so you can explore it.
+This single command does everything:
 
-### 4. Explore the live workspace
+1. Authenticates with Box
+2. Creates a fresh, timestamped Box folder (or uses `BOX_FOLDER_ID`)
+3. Launches an E2B cloud sandbox
+4. Installs Box Mount and mounts the folder inside the sandbox
+5. Seeds the synthetic contract and playbook via the mount
+6. Runs the AI reviewer (Box AI or OpenAI)
+7. Leaves the sandbox running for exploration
 
-Open Box and the E2B filesystem at `/home/user/box-demo`. Changes made on either side are synchronized while the sandbox is running.
+If a previous demo exists, it is torn down automatically before starting.
+
+To place demo folders under a specific parent, set `BOX_PARENT_FOLDER_ID` in
+`.env`. To use a pre-existing folder instead of auto-creating one, set
+`BOX_FOLDER_ID`.
+
+### 3. Explore the live workspace
+
+Open Box and the E2B filesystem at `/home/user/box-demo`. Changes made on
+either side are synchronized while the sandbox is running.
 
 You can check the mount at any time:
 
@@ -98,7 +99,7 @@ You can check the mount at any time:
 npm run status
 ```
 
-### 5. Clean up and repeat
+### 4. Clean up and repeat
 
 When you are finished:
 
@@ -108,16 +109,14 @@ npm run teardown
 
 This performs a final sync, unmounts the Box folder, destroys the sandbox, and
 deletes the auto-created Box folder from Box. All you need for the next demo
-is `npm run setup` again.
+is `npm run demo` again.
 
 **Repeat quickly:**
 
 ```bash
-npm run setup   # auto-cleans previous demo, creates fresh folder, seeds
-npm run demo    # runs the contract review
+npm run demo       # auto-cleans previous demo, seeds, reviews — all in one
 # ... when ready for a fresh run ...
-npm run setup   # tears down and sets up again
-npm run demo
+npm run demo       # tears down and starts fresh
 ```
 
 The included contract and review are synthetic demonstrations, not legal advice.

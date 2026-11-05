@@ -6,5 +6,7 @@ node_modules/
 private/*
 !private/.gitkeep
 
+*.png
+
 .DS_Store
 npm-debug.log*

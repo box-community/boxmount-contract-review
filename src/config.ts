@@ -120,16 +120,9 @@ function commonConfig() {
   };
 }
 
-export function getSetupConfig(): DemoConfig {
+export function getConfig(): DemoConfig {
   return {
     ...commonConfig(),
     boxFolderId: process.env.BOX_FOLDER_ID?.trim() || "",
-  };
-}
-
-export function getDemoConfig(boxFolderId?: string): DemoConfig {
-  return {
-    ...commonConfig(),
-    boxFolderId: boxFolderId || required("BOX_FOLDER_ID"),
   };
 }

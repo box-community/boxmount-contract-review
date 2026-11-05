@@ -9,8 +9,8 @@
   },
   "scripts": {
     "doctor": "tsx src/doctor.ts",
-    "setup": "tsx src/setup.ts",
     "demo": "tsx src/demo.ts",
+    "exec": "tsx src/exec.ts",
     "status": "tsx src/status.ts",
     "teardown": "tsx src/teardown.ts",
     "generate:fixtures": "tsx scripts/generate-fixtures.ts",

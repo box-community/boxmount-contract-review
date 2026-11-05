@@ -34,8 +34,6 @@ export async function runReviewJob(
 
   await runContractAgent(sandbox, config);
 
-  // Local filesystem events normally trigger an immediate cycle. Leave a
-  // small buffer before verifying and handing the sandbox to the user.
   await new Promise((resolve) => setTimeout(resolve, 8_000));
   await sandbox.commands.run(
     `test -s ${shellQuote(REVIEW_OUTPUT_PATH)}`,

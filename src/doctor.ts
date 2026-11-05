@@ -7,7 +7,7 @@ import {
 } from "e2b";
 import { resolveAuth } from "./auth.js";
 import { validateBoxAccess } from "./box.js";
-import { FIXTURES_PATH, getSetupConfig } from "./config.js";
+import { FIXTURES_PATH, getConfig } from "./config.js";
 import {
   createDemoSandbox,
   installBoxMount,
@@ -58,7 +58,7 @@ async function validateOpenAi(
 }
 
 async function main(): Promise<void> {
-  const baseConfig = getSetupConfig();
+  const baseConfig = getConfig();
   await access(
     join(FIXTURES_PATH, "Incoming", "Acme-MSA.docx"),
   );
@@ -83,7 +83,7 @@ async function main(): Promise<void> {
     console.log(`✓ Box folder is accessible: ${box.folder}`);
   } else {
     console.log(
-      `ℹ No BOX_FOLDER_ID set; setup will auto-create under ${parentId === "0" ? "All Files" : `folder ${parentId}`}`,
+      `ℹ No BOX_FOLDER_ID set; demo will auto-create under ${parentId === "0" ? "All Files" : `folder ${parentId}`}`,
     );
   }
 
@@ -108,7 +108,7 @@ async function main(): Promise<void> {
     await sandbox?.kill().catch(() => undefined);
   }
 
-  console.log("\nSetup looks good. Next: npm run setup");
+  console.log("\nAll checks passed. Next: npm run demo");
 }
 
 main().catch((error: unknown) => {

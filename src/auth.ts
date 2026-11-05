@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { exec } from "node:child_process";
-import { readFile, rm, writeFile } from "node:fs/promises";
+import { readFile, rm, stat, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
   BoxClient,
@@ -15,21 +15,28 @@ import { PROJECT_ROOT, type DemoConfig } from "./config.js";
 const TOKENS_PATH = resolve(PROJECT_ROOT, ".box-tokens.json");
 const REDIRECT_PORT = 8787;
 const REDIRECT_URI = `http://localhost:${REDIRECT_PORT}/callback`;
+const REFRESH_SKEW_MS = 60_000;
+
+type StoredAccessToken = AccessToken & { obtainedAt?: number };
 
 class FileTokenStorage implements TokenStorage {
   async store(token: AccessToken): Promise<undefined> {
+    const stored: StoredAccessToken = {
+      ...token,
+      obtainedAt: Date.now(),
+    };
     await writeFile(
       TOKENS_PATH,
-      `${JSON.stringify(token, null, 2)}\n`,
+      `${JSON.stringify(stored, null, 2)}\n`,
       { mode: 0o600 },
     );
     return undefined;
   }
 
-  async get(): Promise<undefined | AccessToken> {
+  async get(): Promise<undefined | StoredAccessToken> {
     try {
       const raw = await readFile(TOKENS_PATH, "utf8");
-      return JSON.parse(raw) as AccessToken;
+      return JSON.parse(raw) as StoredAccessToken;
     } catch {
       return undefined;
     }
@@ -105,6 +112,23 @@ async function authorizeInBrowser(
   await auth.getTokensAuthorizationCodeGrant(code);
 }
 
+async function accessTokenIsStale(
+  token: StoredAccessToken,
+): Promise<boolean> {
+  if (!token.expiresIn || token.expiresIn <= 0) return true;
+
+  let obtainedAt = token.obtainedAt;
+  if (!obtainedAt) {
+    try {
+      obtainedAt = (await stat(TOKENS_PATH)).mtimeMs;
+    } catch {
+      return true;
+    }
+  }
+
+  return Date.now() + REFRESH_SKEW_MS >= obtainedAt + token.expiresIn * 1000;
+}
+
 export type BoxAuth =
   | {
       mode: "oauth";
@@ -140,7 +164,23 @@ export async function authenticateBox(opts: {
       await authorizeInBrowser(auth, opts.clientId);
     }
 
-    const token = await auth.retrieveToken();
+    let token: AccessToken;
+    try {
+      const cached = await tokenStorage.get();
+      if (cached?.accessToken && !(await accessTokenIsStale(cached))) {
+        token = cached;
+      } else {
+        console.log("Refreshing Box access token...");
+        token = await auth.refreshToken();
+      }
+    } catch {
+      console.log(
+        "Saved Box login could not be refreshed. Opening browser...",
+      );
+      await tokenStorage.clear();
+      await authorizeInBrowser(auth, opts.clientId);
+      token = await auth.retrieveToken();
+    }
     if (!token.accessToken) {
       throw new Error(
         "Box OAuth succeeded but no access token was returned.",
